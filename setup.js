@@ -151,6 +151,7 @@ class Game {
     this.height = meterToPix(50);
     this.sideBuffer = meterToPix(10);
     this.bottomBuffer = meterToPix(4);
+    this.gasEnabled = false;
     this.houses = [];
     this.addHouse(50);
   }
@@ -172,13 +173,16 @@ class Game {
     const grav = new Vector(0, -meterToPix(g));
     this.player.applyForce(grav, 60);
 
-    if(space) {
+    if(space && (!this.gasEnabled || this.player.gas > 0)) {
       for(let dir in this.player.grapples) {
         const grapple = this.player.grapples[dir];
         if(grapple && !grapple.shooting) {
           const force = new Vector(grapple.endPos.x, grapple.endPos.y, this.player.pos.x, this.player.pos.y);
           force.setMag(meterToPix(4));
           this.player.applyForce(force, 60);
+          if(this.gasEnabled) {
+            this.player.gas -= .0005;
+          }
         }
       }
     }
@@ -192,6 +196,14 @@ class Game {
     if(this.player.pos.y - this.player.height / 2 < 0) {
       this.player.pos.y = this.player.height / 2;
       this.player.vel.y = 0;
+      if(this.player.numGrapples == 0 && space) {
+        this.player.vel.x *= .95;
+        if(Math.abs(this.player.vel.x) < .5) {
+          this.player.vel.x = 0;
+        }
+      }
+      this.player.gas += .01;
+      this.player.gas = min(1, this.player.gas);
     }
     if(this.player.pos.x + this.player.height / 2 > this.width) {
       this.player.pos.x = this.width - this.player.height / 2;
@@ -201,6 +213,8 @@ class Game {
       this.player.pos.x = this.player.height / 2;
       this.player.vel.x = 0;
     }
+
+
 
     for(let dir in input) {
       if(input[dir] != !!this.player.grapples[dir]) {
@@ -278,6 +292,15 @@ class Game {
       }
     }
 
+    if(this.gasEnabled) {
+      const distFromEdge = 10;
+      const barHeight = 10;
+      const barWidth = 50;
+      ctx.strokeRect(point[0] + distFromEdge + 1, point[1] + height - barHeight - distFromEdge - 1, barWidth, barHeight);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(point[0] + distFromEdge + 1, point[1] + height - barHeight - distFromEdge - 1, barWidth * this.player.gas, barHeight);
+    }
+
     ctx.restore();
   }
 }
@@ -292,6 +315,7 @@ class Player {
     this.numGrapples = 0;
     this.grappleAngle = 140;
     this.onGround = false;
+    this.gas = 1;
   }
 
   applyForce(force, dt) {
@@ -327,5 +351,6 @@ class Grapple {
     this.vel.y = Math.sin(degToRad(angle)) * 100;
     this.vel.getMag();
     this.shooting = true;
+    this.retracting = false;
   }
 }
