@@ -89,6 +89,16 @@ function shuffle(arr) {
   return arr;
 }
 
+function intersects(p11, p12, p21, p22) {
+  const m1 = (p11.y - p12.y) / (p11.x - p12.x);
+  const m2 = (p21.y - p22.y) / (p21.x - p22.x);
+  const x = ((m1 * p11.x) - (m2 * p21.x) - p11.y + p21.y) / (m1 - m2);
+  if((x > p11.x != x > p12.x) && (x > p21.x != p22.x)) {
+    return {'x': x, 'y': m1 * (x - p11.x) + p11.y};
+  }
+  return false;
+}
+
 function meterToPix(n) {
   return n * 20;
 }
