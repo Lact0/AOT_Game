@@ -8,7 +8,7 @@
 let width = window.innerWidth;
 let height = window.innerHeight;
 const input = {ll: false, l: false, r: false, rr: false};
-const g = 3;
+const g = 2.5;
 let space = false;
 let canvas;
 let ctx;
@@ -162,21 +162,22 @@ class Vector {
 class Game {
   constructor() {
     this.player = new Player();
-    this.maxVel = meterToPix(1)
-    this.width = meterToPix(250);
-    this.height = meterToPix(50);
-    this.sideBuffer = meterToPix(10);
+    this.maxVel = meterToPix(1.5);
+    this.width = meterToPix(500);
+    this.height = meterToPix(100);
+    this.sideBuffer = meterToPix(0);
     this.bottomBuffer = meterToPix(4);
+    this.wallWidth = meterToPix(3);
     this.gasEnabled = false;
     this.houses = [];
-    this.addHouse(50);
+    this.addHouse(100);
   }
 
   addHouse(n = 1) {
     for(let i = 0; i < n; i++) {
       const house = [];
       const width = rand(10, 20);
-      const height = rand(20, 40);
+      const height = rand(20, pixToMeter(this.height) - 20);
       const x = rand(0, pixToMeter(this.width) - width);
       house.push(meterToPix(width));
       house.push(meterToPix(height));
