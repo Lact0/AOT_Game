@@ -1,5 +1,6 @@
 window.onresize = changeWindow;
 const game = new Game();
+const reversedControls = false;
 
 function load() {
   canvas = document.querySelector('.canvas');
@@ -27,16 +28,44 @@ function changeWindow() {
 
 function keyDown(key) {
   if(key.keyCode == 65) {
-    input.ll = true;
+    if(!reversedControls) {
+      input.ll = true;
+    }
   }
   if(key.keyCode == 83) {
-    input.l = true;
+    if(!reversedControls) {
+      input.l = true;
+    }
   }
   if(key.keyCode == 68) {
-    input.r = true;
+    if(!reversedControls) {
+      input.r = true;
+    }
   }
   if(key.keyCode == 70) {
-    input.rr = true;
+    if(!reversedControls) {
+      input.rr = true;
+    }
+  }
+  if(key.keyCode == 74) {
+    if(reversedControls) {
+      input.ll = true;
+    }
+  }
+  if(key.keyCode == 75) {
+    if(reversedControls) {
+      input.l = true;
+    }
+  }
+  if(key.keyCode == 76) {
+    if(reversedControls) {
+      input.r = true;
+    }
+  }
+  if(key.keyCode == 186) {
+    if(reversedControls) {
+      input.rr = true;
+    }
   }
   if(key.keyCode == 32) {
     space = true;
@@ -45,16 +74,44 @@ function keyDown(key) {
 
 function keyUp(key) {
   if(key.keyCode == 65) {
-    input.ll = false;
+    if(!reversedControls) {
+      input.ll = false;
+    }
   }
   if(key.keyCode == 83) {
-    input.l = false;
+    if(!reversedControls) {
+      input.l = false;
+    }
   }
   if(key.keyCode == 68) {
-    input.r = false;
+    if(!reversedControls) {
+      input.r = false;
+    }
   }
   if(key.keyCode == 70) {
-    input.rr = false;
+    if(!reversedControls) {
+      input.rr = false;
+    }
+  }
+  if(key.keyCode == 74) {
+    if(reversedControls) {
+      input.ll = false;
+    }
+  }
+  if(key.keyCode == 75) {
+    if(reversedControls) {
+      input.l = false;
+    }
+  }
+  if(key.keyCode == 76) {
+    if(reversedControls) {
+      input.r = false;
+    }
+  }
+  if(key.keyCode == 186) {
+    if(reversedControls) {
+      input.rr = false;
+    }
   }
   if(key.keyCode == 32) {
     space = false;
