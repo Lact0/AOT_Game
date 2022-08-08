@@ -1,6 +1,9 @@
 //POSSIBLE SPRITES
 //https://www.spriters-resource.com/mobile/senransamuraikingdom/
 
+//USE THIS
+//https://www.leshylabs.com/apps/sstool/
+
 //Vars
 let width = window.innerWidth;
 let height = window.innerHeight;
