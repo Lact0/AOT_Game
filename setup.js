@@ -190,10 +190,11 @@ class Game {
     const grav = new Vector(0, -meterToPix(g));
     this.player.applyForce(grav, 60);
 
+    //Pull with grapples
     if(space && (!this.gasEnabled || this.player.gas > 0)) {
       for(let dir in this.player.grapples) {
         const grapple = this.player.grapples[dir];
-        if(grapple && !grapple.shooting) {
+        if(grapple && !grapple.shooting && !grapple.retracting) {
           const force = new Vector(grapple.endPos.x, grapple.endPos.y, this.player.pos.x, this.player.pos.y);
           force.setMag(meterToPix(4));
           this.player.applyForce(force, 60);
@@ -204,6 +205,7 @@ class Game {
       }
     }
 
+    //Update Player position and check for edges
     this.player.vel.add(this.player.accel);
     this.player.vel.limit(this.maxVel);
 
@@ -231,27 +233,41 @@ class Game {
       this.player.vel.x = 0;
     }
 
-
-
+    //Update all grapples with input
     for(let dir in input) {
-      if(input[dir] != !!this.player.grapples[dir]) {
+      const grapple = this.player.grapples[dir];
+      if(input[dir] != !!grapple) {
         if(input[dir] && this.player.numGrapples < 2) {
           this.player.numGrapples += 1;
           this.player.grapples[dir] = new Grapple(dir, this.player.grappleAngle);
         }
-        if(!input[dir]) {
-          this.player.numGrapples -= 1;
-          this.player.grapples[dir] = false;
+        if(!input[dir] && !grapple.retracting) {
+          grapple.retracting = true;
+          if(!grapple.shooting) {
+            grapple.endPos = new Vector(grapple.endPos.x, grapple.endPos.y, this.player.pos.x, this.player.pos.y);
+          }
+          grapple.shooting = false;
         }
       }
       if(this.player.grapples[dir]) {
-        const grapple = this.player.grapples[dir];
         if(grapple.shooting) {
           grapple.endPos.add(grapple.vel);
           if(grapple.endPos.mag > grapple.length) {
             grapple.shooting = false;
             grapple.endPos.limit(grapple.length);
             grapple.endPos.add(this.player.pos);
+          }
+        }
+        if(grapple.retracting) {
+          const vel = grapple.endPos.copy();
+          vel.setMag(100);
+          vel.limit(grapple.endPos.mag);
+
+          grapple.endPos.sub(vel);
+
+          if(grapple.endPos.mag <= 1) {
+            this.player.grapples[dir] = false;
+            this.player.numGrapples -= 1;
           }
         }
       }
@@ -296,7 +312,7 @@ class Game {
       if(!grapple) {
         continue;
       }
-      if(grapple.shooting) {
+      if(grapple.shooting || grapple.retracting) {
         ctx.beginPath();
         ctx.moveTo(this.player.pos.x, this.player.pos.y);
         ctx.lineTo(grapple.endPos.x + this.player.pos.x, grapple.endPos.y + this.player.pos.y);
