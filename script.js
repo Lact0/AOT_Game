@@ -5,7 +5,6 @@ const reversedControls = false;
 function load() {
   canvas = document.querySelector('.canvas');
   ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled= false
   canvas.width = width;
   canvas.height = height;
   document.onkeydown = keyDown;

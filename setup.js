@@ -2,7 +2,7 @@
 let width = window.innerWidth;
 let height = window.innerHeight;
 const input = {ll: false, l: false, r: false, rr: false};
-const g = 2.5;
+const g = 1.25;
 let space = false;
 let canvas;
 let ctx;
@@ -102,11 +102,11 @@ function intersects(p11, p12, p21, p22) {
 }
 
 function meterToPix(n) {
-  return n * 20;
+  return n * 40;
 }
 
 function pixToMeter(n) {
-  return n / 20;
+  return n / 40;
 }
 
 //Classes
@@ -164,12 +164,12 @@ class Vector {
 class Game {
   constructor() {
     this.player = new Player();
-    this.maxVel = meterToPix(1.5);
-    this.width = meterToPix(500);
-    this.height = meterToPix(100);
+    this.maxVel = meterToPix(.75);
+    this.width = meterToPix(250);
+    this.height = meterToPix(50);
     this.sideBuffer = meterToPix(0);
-    this.bottomBuffer = meterToPix(4);
-    this.wallWidth = meterToPix(3);
+    this.bottomBuffer = meterToPix(2);
+    this.wallWidth = meterToPix(1.5);
     this.gasEnabled = false;
     this.houses = [];
     this.addHouse(100);
@@ -180,8 +180,8 @@ class Game {
   addHouse(n = 1) {
     for(let i = 0; i < n; i++) {
       const house = [];
-      const width = rand(10, 20);
-      const height = rand(20, pixToMeter(this.height) - 20);
+      const width = rand(5, 10);
+      const height = rand(10, pixToMeter(this.height) - 10);
       const x = rand(0, pixToMeter(this.width) - width);
       house.push(meterToPix(width));
       house.push(meterToPix(height));
@@ -200,7 +200,7 @@ class Game {
         const grapple = this.player.grapples[dir];
         if(grapple && !grapple.shooting && !grapple.retracting) {
           const force = new Vector(grapple.endPos.x, grapple.endPos.y, this.player.pos.x, this.player.pos.y);
-          force.setMag(meterToPix(4));
+          force.setMag(meterToPix(2));
           this.player.applyForce(force, 60);
           if(this.gasEnabled) {
             this.player.gas -= .0005;
@@ -384,7 +384,7 @@ class Player {
   constructor() {
     this.pos = new Vector(500, 500);
     this.vel = new Vector();
-    this.height = meterToPix(4);
+    this.height = meterToPix(2);
     this.accel = new Vector(0, 0);
     this.grapples = {ll: false, l: false, r: false, rr: false};
     this.numGrapples = 0;
@@ -405,7 +405,7 @@ class Player {
 class Grapple {
   constructor(dir, angleRange) {
     this.endPos = new Vector();
-    this.length = meterToPix(50);
+    this.length = meterToPix(25);
     let angle = 0;
     switch(dir) {
       case 'll':
@@ -432,7 +432,7 @@ class Grapple {
 
 class Titan {
   constructor() {
-    const possibleHeights = [30, 40, 60, 70]
+    const possibleHeights = [15, 20, 30, 35]
     this.height = meterToPix(possibleHeights[rand(0, 3)]);
     this.x = 500;
     this.vel = 0;
