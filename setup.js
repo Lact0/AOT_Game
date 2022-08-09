@@ -1,9 +1,3 @@
-//POSSIBLE SPRITES
-//https://www.spriters-resource.com/mobile/senransamuraikingdom/
-
-//USE THIS
-//https://www.leshylabs.com/apps/sstool/
-
 //Vars
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -12,6 +6,14 @@ const g = 2.5;
 let space = false;
 let canvas;
 let ctx;
+let imageStatus = {standingSprites: false};
+
+const standingSprites = new Image();
+standingSprites.src = 'Soldier Stand.png';
+standingSprites.onload = function() {
+  imageStatus.standingSprites = true;
+};
+
 
 //Useful Functions
 function max(n1, n2) {
@@ -171,6 +173,8 @@ class Game {
     this.gasEnabled = false;
     this.houses = [];
     this.addHouse(100);
+    this.titans = [new Titan()];
+    this.counter = 0;
   }
 
   addHouse(n = 1) {
@@ -187,7 +191,7 @@ class Game {
   }
 
   step() {
-    const grav = new Vector(0, -meterToPix(g));
+    const grav = new Vector(0, meterToPix(g));
     this.player.applyForce(grav, 60);
 
     //Pull with grapples
@@ -212,8 +216,8 @@ class Game {
     this.player.pos.add(this.player.vel);
     this.player.accel = new Vector();
 
-    if(this.player.pos.y - this.player.height / 2 < 0) {
-      this.player.pos.y = this.player.height / 2;
+    if(this.player.pos.y + this.player.height / 2 > this.height) {
+      this.player.pos.y = this.height - this.player.height / 2;
       this.player.vel.y = 0;
       if(this.player.numGrapples == 0 && space) {
         this.player.vel.x *= .95;
@@ -272,21 +276,35 @@ class Game {
         }
       }
     }
+
+    for(let titan of this.titans) {
+      if(titan.x < this.player.pos.x) {
+        titan.vel += .2;
+      } else {
+        titan.vel -= .2;
+      }
+      titan.vel = max(min(titan.maxVel, titan.vel), -titan.maxVel);
+      titan.x += titan.vel;
+    }
   }
 
   draw() {
     ctx.save();
-    ctx.transform(1, 0, 0, -1, 0, canvas.height);
+    ctx.imageSmoothingEnabled = false;
 
+    //Move Camera
     let point = [this.player.pos.x - (width / 2), this.player.pos.y - (height / 2)];
     point[0] = min(max(point[0], -this.sideBuffer), this.width + this.sideBuffer - width);
-    point[1] = min(max(-this.bottomBuffer, point[1]), this.height - height);
+    point[1] = min(max(0, point[1]), this.height + this.bottomBuffer - height);
     ctx.translate(-point[0], -point[1]);
 
+    ctx.lineWidth = 1;
     ctx.strokeStyle = 'white';
+
+    //Draw Ground And Walls
     ctx.beginPath();
-    ctx.moveTo(-this.sideBuffer, 0);
-    ctx.lineTo(this.width + this.sideBuffer, 0);
+    ctx.moveTo(-this.sideBuffer, this.height);
+    ctx.lineTo(this.width + this.sideBuffer, this.height);
     ctx.moveTo(0, 0);
     ctx.lineTo(0, this.height);
     ctx.moveTo(this.width, 0);
@@ -294,18 +312,42 @@ class Game {
     ctx.stroke();
 
     for(let house of this.houses) {
-      ctx.clearRect(house[2], 1, house[0], house[1]);
+      ctx.clearRect(house[2], this.height - house[1], house[0], house[1]);
       ctx.beginPath();
-      ctx.moveTo(house[2], 0);
-      ctx.lineTo(house[2], house[1]);
-      ctx.lineTo(house[2] + house[0], house[1]);
-      ctx.lineTo(house[2] + house[0], 0);
+      ctx.moveTo(house[2], this.height);
+      ctx.lineTo(house[2], this.height - house[1]);
+      ctx.lineTo(house[2] + house[0], this.height - house[1]);
+      ctx.lineTo(house[2] + house[0], this.height);
       ctx.stroke();
     }
 
-    ctx.beginPath();
-    ctx.arc(this.player.pos.x, this.player.pos.y, this.player.height / 2, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.fillStyle = 'maroon';
+
+    for(let titan of this.titans) {
+      const headDiam = titan.height / 8;
+      const shoulderDiam = headDiam * 1.25;
+      const headGap = headDiam * .7;
+      ctx.beginPath();
+      ctx.arc(titan.x, this.height - titan.height, headDiam / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(titan.x - shoulderDiam / 2, this.height - titan.height + headGap, shoulderDiam, titan.height - headGap);
+    }
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'white';
+
+
+    //Draw player
+    if(imageStatus.standingSprites) {
+      const r = this.player.height / 2;
+      ctx.drawImage(standingSprites, Math.floor(this.counter / 30) * 64, 0, 64, 64, this.player.pos.x - r, this.player.pos.y - r, this.player.height, this.player.height);
+      this.counter = (this.counter + 1) % 60;
+    } else {
+      ctx.beginPath();
+      ctx.arc(this.player.pos.x, this.player.pos.y, this.player.height / 2, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     for(const dir in this.player.grapples) {
       const grapple = this.player.grapples[dir];
@@ -342,7 +384,7 @@ class Player {
   constructor() {
     this.pos = new Vector(500, 500);
     this.vel = new Vector();
-    this.height = meterToPix(2);
+    this.height = meterToPix(4);
     this.accel = new Vector(0, 0);
     this.grapples = {ll: false, l: false, r: false, rr: false};
     this.numGrapples = 0;
@@ -381,9 +423,19 @@ class Grapple {
     }
     this.vel = new Vector();
     this.vel.x = Math.cos(degToRad(angle)) * 100;
-    this.vel.y = Math.sin(degToRad(angle)) * 100;
+    this.vel.y = -Math.sin(degToRad(angle)) * 100;
     this.vel.getMag();
     this.shooting = true;
     this.retracting = false;
+  }
+}
+
+class Titan {
+  constructor() {
+    const possibleHeights = [30, 40, 60, 70]
+    this.height = meterToPix(possibleHeights[rand(0, 3)]);
+    this.x = 500;
+    this.vel = 0;
+    this.maxVel = meterToPix(1);
   }
 }
