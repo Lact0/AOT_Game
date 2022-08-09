@@ -1,3 +1,9 @@
+//Make Sprites with
+//https://www.piskelapp.com/p/create/sprite
+
+//Pack them with
+//https://www.leshylabs.com/apps/sstool/
+
 //Vars
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -164,7 +170,7 @@ class Vector {
 class Game {
   constructor() {
     this.player = new Player();
-    this.maxVel = meterToPix(.75);
+    this.maxVel = meterToPix(1);
     this.width = meterToPix(250);
     this.height = meterToPix(50);
     this.sideBuffer = meterToPix(0);
@@ -341,7 +347,7 @@ class Game {
     //Draw player
     if(imageStatus.standingSprites) {
       const r = this.player.height / 2;
-      ctx.drawImage(standingSprites, Math.floor(this.counter / 30) * 64, 0, 64, 64, this.player.pos.x - r, this.player.pos.y - r, this.player.height, this.player.height);
+      ctx.drawImage(standingSprites, Math.floor(this.counter / 30) * 64, 0, 64, 64, Math.round(this.player.pos.x - r), Math.round(this.player.pos.y - r), this.player.height, this.player.height);
       this.counter = (this.counter + 1) % 60;
     } else {
       ctx.beginPath();
@@ -399,7 +405,6 @@ class Player {
     force.getMag();
     this.accel.add(force);
   }
-
 }
 
 class Grapple {
@@ -436,6 +441,6 @@ class Titan {
     this.height = meterToPix(possibleHeights[rand(0, 3)]);
     this.x = 500;
     this.vel = 0;
-    this.maxVel = meterToPix(1);
+    this.maxVel = meterToPix(.5);
   }
 }
