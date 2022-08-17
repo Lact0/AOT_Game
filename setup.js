@@ -179,7 +179,7 @@ class Game {
     this.gasEnabled = false;
     this.houses = [];
     this.addHouse(100);
-    this.titans = [new Titan()];
+    this.titans = [];
     this.counter = 0;
   }
 
@@ -355,6 +355,10 @@ class Game {
       ctx.stroke();
     }
 
+    //Draw Grapples
+    ctx.fillStyle = 'red';
+    let grappleNum = 0;
+    let grappleOffset = [[-10, 15], [20, 15]];
     for(const dir in this.player.grapples) {
       const grapple = this.player.grapples[dir];
       if(!grapple) {
@@ -362,15 +366,16 @@ class Game {
       }
       if(grapple.shooting || grapple.retracting) {
         ctx.beginPath();
-        ctx.moveTo(this.player.pos.x, this.player.pos.y);
+        ctx.moveTo(this.player.pos.x + grappleOffset[grappleNum][0], this.player.pos.y + grappleOffset[grappleNum][1]);
         ctx.lineTo(grapple.endPos.x + this.player.pos.x, grapple.endPos.y + this.player.pos.y);
         ctx.stroke();
       } else {
         ctx.beginPath();
-        ctx.moveTo(this.player.pos.x, this.player.pos.y);
+        ctx.moveTo(this.player.pos.x + grappleOffset[grappleNum][0], this.player.pos.y + grappleOffset[grappleNum][1]);
         ctx.lineTo(grapple.endPos.x, grapple.endPos.y);
         ctx.stroke();
       }
+      grappleNum++;
     }
 
     if(this.gasEnabled) {
